@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dedalo NK Analysis"
+  short_description: "Review coupling, stressors and residues"
+  default_prompt: "Use $dedalo-nk-analysis to review parent and submodule coupling and record stressors and residues in Dedalo."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dedalo Live Canvas"
+  short_description: "Inspect and draw through Dedalo MCP"
+  default_prompt: "Use $dedalo-live-canvas to inspect my loaded canvas and draw the requested architecture."

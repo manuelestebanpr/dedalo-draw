@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.codegraph/
+test-results/
+playwright-report/
+.DS_Store
+# Local Pi runtime state
+.atl/

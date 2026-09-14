@@ -1,0 +1,41 @@
+{
+  "name": "dedalo-draw",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n web,mcp-bridge \"vite --host 127.0.0.1\" \"tsx server/bridge.ts\"",
+    "build": "tsc --noEmit && vite build",
+    "start": "concurrently -k -n web,mcp-bridge \"vite preview --host 127.0.0.1\" \"tsx server/bridge.ts\"",
+    "mcp": "tsx server/mcp.ts",
+    "test": "tsx --test test/*.test.ts",
+    "test:e2e": "playwright test",
+    "format": "prettier --write src server test docs *.ts *.json README.md",
+    "format:check": "prettier --check src server test docs *.ts *.json README.md"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@xyflow/react": "^12.0.0",
+    "lucide-react": "^0.577.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "ws": "^8.18.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/ws": "^8.18.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^9.2.0",
+    "prettier": "^3.9.6",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0"
+  }
+}

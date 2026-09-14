@@ -1,0 +1,1099 @@
+{
+  "format": "dedalo-draw",
+  "version": 1,
+  "name": "NK demo · order platform",
+  "revision": 0,
+  "items": [
+    {
+      "id": "shop",
+      "kind": "client",
+      "defaultPurpose": true,
+      "name": "Storefront",
+      "x": -360,
+      "y": 90,
+      "width": 240,
+      "height": 120,
+      "groups": [],
+      "color": "navy",
+      "icon": "browser",
+      "shape": "card",
+      "status": "neutral",
+      "collapsed": false,
+      "details": {
+        "description": "Submits orders with an idempotency key. Shows pending payment and fulfillment status.",
+        "protocol": "",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "orders",
+      "kind": "container",
+      "defaultPurpose": true,
+      "name": "Orders",
+      "x": 0,
+      "y": 0,
+      "width": 960,
+      "height": 330,
+      "groups": [],
+      "color": "slate",
+      "icon": "box",
+      "shape": "card",
+      "status": "neutral",
+      "collapsed": false,
+      "details": {
+        "description": "Owns order state and the atomic order/outbox invariant. One team and one data ownership boundary.",
+        "protocol": "",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "api",
+      "kind": "service",
+      "defaultPurpose": true,
+      "name": "Order API",
+      "x": 40,
+      "y": 90,
+      "width": 240,
+      "height": 120,
+      "parentId": "orders",
+      "groups": [],
+      "color": "blue",
+      "icon": "server",
+      "shape": "card",
+      "status": "neutral",
+      "collapsed": false,
+      "details": {
+        "description": "Commits pending orders and outbox rows atomically. Calls payment provider with a stable idempotency key; reconciles ambiguous timeouts.",
+        "protocol": "",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "ledger",
+      "kind": "database",
+      "defaultPurpose": true,
+      "name": "Order ledger + outbox",
+      "x": 360,
+      "y": 90,
+      "width": 240,
+      "height": 120,
+      "parentId": "orders",
+      "groups": [],
+      "color": "teal",
+      "icon": "database",
+      "shape": "card",
+      "status": "neutral",
+      "collapsed": false,
+      "details": {
+        "description": "Private PostgreSQL store. An accepted order and its event intent commit together. No shared writes from other domains.",
+        "protocol": "",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "relay",
+      "kind": "service",
+      "defaultPurpose": true,
+      "name": "Outbox relay",
+      "x": 680,
+      "y": 90,
+      "width": 240,
+      "height": 120,
+      "parentId": "orders",
+      "groups": [],
+      "color": "blue",
+      "icon": "server",
+      "shape": "card",
+      "status": "neutral",
+      "collapsed": false,
+      "details": {
+        "description": "Polls pending outbox rows. Marks published after broker acknowledgment. Retries may duplicate events.",
+        "protocol": "",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "payment",
+      "kind": "service",
+      "defaultPurpose": true,
+      "name": "Payment provider",
+      "x": 40,
+      "y": -260,
+      "width": 240,
+      "height": 120,
+      "groups": [],
+      "color": "blue",
+      "icon": "server",
+      "shape": "card",
+      "status": "neutral",
+      "collapsed": false,
+      "details": {
+        "description": "External payment processor. Charges use an order-scoped idempotency key; provider reconciliation resolves ambiguous outcomes.",
+        "protocol": "",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "broker",
+      "kind": "queue",
+      "defaultPurpose": true,
+      "name": "Event broker",
+      "x": 1120,
+      "y": 90,
+      "width": 240,
+      "height": 120,
+      "groups": [],
+      "color": "warning",
+      "icon": "queue",
+      "shape": "card",
+      "status": "neutral",
+      "collapsed": false,
+      "details": {
+        "description": "Durable OrderAccepted events. At-least-once delivery; retention is finite. Schemas carry version and stable event ID.",
+        "protocol": "",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "fulfillment",
+      "kind": "container",
+      "defaultPurpose": true,
+      "name": "Fulfillment",
+      "x": 0,
+      "y": 550,
+      "width": 960,
+      "height": 330,
+      "groups": [],
+      "color": "slate",
+      "icon": "box",
+      "shape": "card",
+      "status": "neutral",
+      "collapsed": false,
+      "details": {
+        "description": "Owns shipment processing. Current callback to Orders couples the two domains.",
+        "protocol": "",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "worker",
+      "kind": "service",
+      "defaultPurpose": true,
+      "name": "Fulfillment worker",
+      "x": 40,
+      "y": 90,
+      "width": 240,
+      "height": 120,
+      "parentId": "fulfillment",
+      "groups": [],
+      "color": "blue",
+      "icon": "server",
+      "shape": "card",
+      "status": "neutral",
+      "collapsed": false,
+      "details": {
+        "description": "Consumes accepted orders, checks order status via Orders, and records work with durable deduplication before acknowledging.",
+        "protocol": "",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "shipping-db",
+      "kind": "database",
+      "defaultPurpose": true,
+      "name": "Shipment ledger",
+      "x": 400,
+      "y": 90,
+      "width": 240,
+      "height": 120,
+      "parentId": "fulfillment",
+      "groups": [],
+      "color": "teal",
+      "icon": "database",
+      "shape": "card",
+      "status": "neutral",
+      "collapsed": false,
+      "details": {
+        "description": "Unique event ID and shipment records. Carrier effects require stable idempotency keys and reconciliation beyond this database.",
+        "protocol": "",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "shop-order",
+      "source": "shop",
+      "target": "api",
+      "sourcePort": "right",
+      "targetPort": "left",
+      "name": "Submit order",
+      "lineStyle": "solid",
+      "direction": "one-way",
+      "groups": [],
+      "details": {
+        "description": "",
+        "protocol": "HTTPS",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "Return pending or confirmed; retry with same idempotency key.",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "order-ledger",
+      "source": "api",
+      "target": "ledger",
+      "sourcePort": "right",
+      "targetPort": "left",
+      "name": "Commit order + event",
+      "lineStyle": "solid",
+      "direction": "one-way",
+      "groups": [],
+      "details": {
+        "description": "",
+        "protocol": "SQL",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "Atomic transaction; reject acceptance if durable commit fails.",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "order-payment",
+      "source": "api",
+      "target": "payment",
+      "sourcePort": "right",
+      "targetPort": "left",
+      "name": "Authorize payment",
+      "lineStyle": "solid",
+      "direction": "one-way",
+      "groups": [],
+      "details": {
+        "description": "",
+        "protocol": "HTTPS",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "Deadline with reconciliation; never interpret timeout as decline.",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "relay-ledger",
+      "source": "relay",
+      "target": "ledger",
+      "sourcePort": "right",
+      "targetPort": "left",
+      "name": "Read pending outbox",
+      "lineStyle": "solid",
+      "direction": "one-way",
+      "groups": [],
+      "details": {
+        "description": "",
+        "protocol": "SQL",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "Keep pending until broker acknowledgment.",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "relay-broker",
+      "source": "relay",
+      "target": "broker",
+      "sourcePort": "right",
+      "targetPort": "left",
+      "name": "Publish accepted order",
+      "lineStyle": "solid",
+      "direction": "one-way",
+      "groups": [],
+      "details": {
+        "description": "",
+        "protocol": "Events",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "Bounded retry with backoff; monitor oldest pending event.",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "broker-worker",
+      "source": "broker",
+      "target": "worker",
+      "sourcePort": "right",
+      "targetPort": "left",
+      "name": "Deliver order event",
+      "lineStyle": "solid",
+      "direction": "one-way",
+      "groups": [],
+      "details": {
+        "description": "",
+        "protocol": "Events",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "At-least-once delivery; deduplicate stable event ID.",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "worker-ledger",
+      "source": "worker",
+      "target": "shipping-db",
+      "sourcePort": "right",
+      "targetPort": "left",
+      "name": "Deduplicate + record",
+      "lineStyle": "solid",
+      "direction": "one-way",
+      "groups": [],
+      "details": {
+        "description": "",
+        "protocol": "SQL",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "Commit before acknowledging; reconcile external carrier effects.",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    },
+    {
+      "id": "worker-order",
+      "source": "worker",
+      "target": "api",
+      "sourcePort": "right",
+      "targetPort": "left",
+      "name": "Check order status",
+      "lineStyle": "solid",
+      "direction": "one-way",
+      "groups": [],
+      "details": {
+        "description": "",
+        "protocol": "HTTPS",
+        "encoding": "",
+        "request": "",
+        "response": "",
+        "failure": "If Orders is unavailable, shipment processing stalls.",
+        "timeout": "",
+        "security": "",
+        "owner": ""
+      }
+    }
+  ],
+  "analyses": [
+    {
+      "id": "nk-parent",
+      "name": "01 · Parent modules · baseline",
+      "baselineRevision": 0,
+      "topology": {
+        "nodes": [
+          {
+            "id": "shop",
+            "name": "Storefront",
+            "kind": "client"
+          },
+          {
+            "id": "orders",
+            "name": "Orders",
+            "kind": "container"
+          },
+          {
+            "id": "api",
+            "name": "Order API",
+            "kind": "service",
+            "parentId": "orders"
+          },
+          {
+            "id": "ledger",
+            "name": "Order ledger + outbox",
+            "kind": "database",
+            "parentId": "orders"
+          },
+          {
+            "id": "relay",
+            "name": "Outbox relay",
+            "kind": "service",
+            "parentId": "orders"
+          },
+          {
+            "id": "payment",
+            "name": "Payment provider",
+            "kind": "service"
+          },
+          {
+            "id": "broker",
+            "name": "Event broker",
+            "kind": "queue"
+          },
+          {
+            "id": "fulfillment",
+            "name": "Fulfillment",
+            "kind": "container"
+          },
+          {
+            "id": "worker",
+            "name": "Fulfillment worker",
+            "kind": "service",
+            "parentId": "fulfillment"
+          },
+          {
+            "id": "shipping-db",
+            "name": "Shipment ledger",
+            "kind": "database",
+            "parentId": "fulfillment"
+          }
+        ],
+        "edges": [
+          {
+            "id": "shop-order",
+            "source": "shop",
+            "target": "api",
+            "direction": "one-way"
+          },
+          {
+            "id": "order-ledger",
+            "source": "api",
+            "target": "ledger",
+            "direction": "one-way"
+          },
+          {
+            "id": "order-payment",
+            "source": "api",
+            "target": "payment",
+            "direction": "one-way"
+          },
+          {
+            "id": "relay-ledger",
+            "source": "relay",
+            "target": "ledger",
+            "direction": "one-way"
+          },
+          {
+            "id": "relay-broker",
+            "source": "relay",
+            "target": "broker",
+            "direction": "one-way"
+          },
+          {
+            "id": "broker-worker",
+            "source": "broker",
+            "target": "worker",
+            "direction": "one-way"
+          },
+          {
+            "id": "worker-ledger",
+            "source": "worker",
+            "target": "shipping-db",
+            "direction": "one-way"
+          },
+          {
+            "id": "worker-order",
+            "source": "worker",
+            "target": "api",
+            "direction": "one-way"
+          }
+        ]
+      },
+      "assumptions": "Illustrative design review, not a production experiment. Arrows encode interactions, not necessarily dependency direction (broker delivery is one example). Five parent modules include the external payment provider and storefront; notes are excluded. Descendant interactions roll up to their owning module. No fixed K threshold establishes criticality.",
+      "recommendations": "The Orders → broker → Fulfillment → Orders interaction cycle deserves review. A versioned order snapshot in the event could remove the synchronous status callback, trading freshness for availability and adding contract/reconciliation responsibilities. Removing that one arrow gives L=4 and K̄=0.8 instead of L=5 and K̄=1.0, but does not prove resilience or remove semantic coupling. Keep Orders and Fulfillment separate because they own different invariants; do not merge merely to lower N or hide links.",
+      "stressors": [
+        {
+          "id": "s-broker",
+          "name": "Broker unavailable",
+          "scenario": "Broker is unreachable for two hours during peak orders. Observe outbox growth, disk headroom and recovery drain rate.",
+          "set": "training",
+          "impacts": [
+            {
+              "componentId": "shop",
+              "state": "degraded",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "orders",
+              "state": "degraded",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "payment",
+              "state": "unaffected",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "broker",
+              "state": "failed",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "fulfillment",
+              "state": "degraded",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            }
+          ]
+        },
+        {
+          "id": "s-payment",
+          "name": "Ambiguous payment timeout",
+          "scenario": "Provider commits a charge but its reply is lost. Repeat the request and later reconcile.",
+          "set": "training",
+          "impacts": [
+            {
+              "componentId": "shop",
+              "state": "degraded",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "orders",
+              "state": "degraded",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "payment",
+              "state": "degraded",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "broker",
+              "state": "unaffected",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "fulfillment",
+              "state": "degraded",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            }
+          ]
+        },
+        {
+          "id": "s-duplicate",
+          "name": "Duplicate event after crash",
+          "scenario": "Consumer commits its shipment record then crashes before acknowledgment. Broker redelivers the event.",
+          "set": "training",
+          "impacts": [
+            {
+              "componentId": "shop",
+              "state": "unaffected",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "orders",
+              "state": "unaffected",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "payment",
+              "state": "unaffected",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "broker",
+              "state": "unaffected",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            },
+            {
+              "componentId": "fulfillment",
+              "state": "degraded",
+              "evidence": "Design hypothesis based on the documented contracts; validate through fault injection."
+            }
+          ]
+        },
+        {
+          "id": "s-compound",
+          "name": "Region loss + staff absence",
+          "scenario": "Holdout: Orders storage region is lost while the on-call team is unavailable. Evaluate a documented restore and operational handoff without changing the candidate during evaluation.",
+          "set": "holdout",
+          "impacts": [
+            {
+              "componentId": "shop",
+              "state": "unknown",
+              "evidence": "Unassessed holdout; no observed outcome."
+            },
+            {
+              "componentId": "orders",
+              "state": "unknown",
+              "evidence": "Unassessed holdout; no observed outcome."
+            },
+            {
+              "componentId": "payment",
+              "state": "unknown",
+              "evidence": "Unassessed holdout; no observed outcome."
+            },
+            {
+              "componentId": "broker",
+              "state": "unknown",
+              "evidence": "Unassessed holdout; no observed outcome."
+            },
+            {
+              "componentId": "fulfillment",
+              "state": "unknown",
+              "evidence": "Unassessed holdout; no observed outcome."
+            }
+          ]
+        }
+      ],
+      "residues": [
+        {
+          "id": "r-outbox",
+          "name": "Durable acceptance, delayed delivery",
+          "stressorIds": [
+            "s-broker"
+          ],
+          "componentIds": [
+            "orders",
+            "broker",
+            "fulfillment"
+          ],
+          "survives": "Committed order intent remains in the private ledger while event publication and shipments wait.",
+          "adaptation": "Preserve atomic order/outbox commit. Add backlog age alerts, capacity budgets and admission control before disk exhaustion. Drain on recovery.",
+          "remaining": "Database/region failure still blocks acceptance. An outage longer than the capacity budget exhausts storage. Recovery throughput and customer expectations remain constraints.",
+          "evidence": "Proposed test: isolate broker for two hours under representative load; prove no accepted event loss and measure backlog drain and disk growth.",
+          "status": "hypothesis"
+        },
+        {
+          "id": "r-payment",
+          "name": "Pending payment and reconciliation",
+          "stressorIds": [
+            "s-payment"
+          ],
+          "componentIds": [
+            "orders",
+            "payment",
+            "shop"
+          ],
+          "survives": "Order intent and stable payment identity survive an ambiguous response; the UI can represent pending status.",
+          "adaptation": "Use provider idempotency and reconciliation; fulfill only after confirmed payment. Bound retries and isolate payment calls.",
+          "remaining": "Provider semantics and retention may limit deduplication. Prolonged outage delays confirmation; manual dispute handling may still be needed.",
+          "evidence": "Proposed test: drop successful charge responses, retry the same key and reconcile; assert a single charge and no unpaid shipment.",
+          "status": "hypothesis"
+        },
+        {
+          "id": "r-fulfillment",
+          "name": "Replayable fulfillment",
+          "stressorIds": [
+            "s-duplicate"
+          ],
+          "componentIds": [
+            "fulfillment",
+            "broker"
+          ],
+          "survives": "Durable event identity and shipment intent permit replay without another local shipment record.",
+          "adaptation": "Commit deduplication and shipment intent atomically. Use idempotent carrier requests plus reconciliation. Consider an event projection to remove the Orders callback.",
+          "remaining": "Local deduplication alone cannot guarantee exactly-once external carrier effects. Schema evolution, backlog and stale cancellation information need tests.",
+          "evidence": "Proposed test: crash before/after database commit and carrier response; replay each event and reconcile the carrier ledger.",
+          "status": "hypothesis"
+        },
+        {
+          "id": "r-holdout",
+          "name": "Unassessed compound stress",
+          "stressorIds": [
+            "s-compound"
+          ],
+          "componentIds": [
+            "orders",
+            "fulfillment",
+            "shop"
+          ],
+          "survives": "Unknown until a restore and handoff exercise is performed.",
+          "adaptation": "Freeze a candidate after training. Evaluate this holdout separately and record business capability recovery, not just server availability.",
+          "remaining": "Recovery time, recovery point, credential access and operator independence are unverified.",
+          "evidence": "No test executed; do not use this scenario to claim generalization.",
+          "status": "hypothesis"
+        }
+      ]
+    },
+    {
+      "id": "nk-orders",
+      "name": "02 · Orders · submodules",
+      "scopeId": "orders",
+      "baselineRevision": 0,
+      "topology": {
+        "nodes": [
+          {
+            "id": "shop",
+            "name": "Storefront",
+            "kind": "client"
+          },
+          {
+            "id": "orders",
+            "name": "Orders",
+            "kind": "container"
+          },
+          {
+            "id": "api",
+            "name": "Order API",
+            "kind": "service",
+            "parentId": "orders"
+          },
+          {
+            "id": "ledger",
+            "name": "Order ledger + outbox",
+            "kind": "database",
+            "parentId": "orders"
+          },
+          {
+            "id": "relay",
+            "name": "Outbox relay",
+            "kind": "service",
+            "parentId": "orders"
+          },
+          {
+            "id": "payment",
+            "name": "Payment provider",
+            "kind": "service"
+          },
+          {
+            "id": "broker",
+            "name": "Event broker",
+            "kind": "queue"
+          },
+          {
+            "id": "fulfillment",
+            "name": "Fulfillment",
+            "kind": "container"
+          },
+          {
+            "id": "worker",
+            "name": "Fulfillment worker",
+            "kind": "service",
+            "parentId": "fulfillment"
+          },
+          {
+            "id": "shipping-db",
+            "name": "Shipment ledger",
+            "kind": "database",
+            "parentId": "fulfillment"
+          }
+        ],
+        "edges": [
+          {
+            "id": "shop-order",
+            "source": "shop",
+            "target": "api",
+            "direction": "one-way"
+          },
+          {
+            "id": "order-ledger",
+            "source": "api",
+            "target": "ledger",
+            "direction": "one-way"
+          },
+          {
+            "id": "order-payment",
+            "source": "api",
+            "target": "payment",
+            "direction": "one-way"
+          },
+          {
+            "id": "relay-ledger",
+            "source": "relay",
+            "target": "ledger",
+            "direction": "one-way"
+          },
+          {
+            "id": "relay-broker",
+            "source": "relay",
+            "target": "broker",
+            "direction": "one-way"
+          },
+          {
+            "id": "broker-worker",
+            "source": "broker",
+            "target": "worker",
+            "direction": "one-way"
+          },
+          {
+            "id": "worker-ledger",
+            "source": "worker",
+            "target": "shipping-db",
+            "direction": "one-way"
+          },
+          {
+            "id": "worker-order",
+            "source": "worker",
+            "target": "api",
+            "direction": "one-way"
+          }
+        ]
+      },
+      "assumptions": "Three internal submodules. API → ledger and relay → ledger are the two internal interactions (K̄=0.67). Provider and broker interactions are shown as boundary crossings, not discarded dependencies.",
+      "recommendations": "Keep order state and outbox in one transaction and ownership boundary. Splitting them into independently committed stores would break acceptance/event consistency. API and relay may deploy separately for scaling, but share schema evolution and database failure exposure; coordinate migrations. Isolate provider calls from database transactions.",
+      "stressors": [
+        {
+          "id": "s-db",
+          "name": "Database unavailable",
+          "scenario": "Stop the primary during order acceptance and relay polling.",
+          "set": "training",
+          "impacts": [
+            {
+              "componentId": "api",
+              "state": "degraded",
+              "evidence": "Hypothesis: durable acceptance and relay polling require the private ledger."
+            },
+            {
+              "componentId": "ledger",
+              "state": "failed",
+              "evidence": "Hypothesis: durable acceptance and relay polling require the private ledger."
+            },
+            {
+              "componentId": "relay",
+              "state": "degraded",
+              "evidence": "Hypothesis: durable acceptance and relay polling require the private ledger."
+            }
+          ]
+        }
+      ],
+      "residues": [
+        {
+          "id": "r-consistency",
+          "name": "Honest rejection and recoverable intent",
+          "stressorIds": [
+            "s-db"
+          ],
+          "componentIds": [
+            "api",
+            "ledger",
+            "relay"
+          ],
+          "survives": "Previously committed orders remain recoverable if durable storage and backups survive; new orders are not falsely acknowledged.",
+          "adaptation": "Return a retryable failure for uncommitted requests; retain the idempotency key. Exercise restore and relay restart.",
+          "remaining": "This is consistency preservation, not continuous availability. Corrupt backups or region-wide loss may destroy the assumed residue.",
+          "evidence": "Proposed test: kill database during commit; reconcile acknowledged requests with committed order/outbox records after restore.",
+          "status": "hypothesis"
+        }
+      ]
+    },
+    {
+      "id": "nk-fulfillment",
+      "name": "03 · Fulfillment · submodules",
+      "scopeId": "fulfillment",
+      "baselineRevision": 0,
+      "topology": {
+        "nodes": [
+          {
+            "id": "shop",
+            "name": "Storefront",
+            "kind": "client"
+          },
+          {
+            "id": "orders",
+            "name": "Orders",
+            "kind": "container"
+          },
+          {
+            "id": "api",
+            "name": "Order API",
+            "kind": "service",
+            "parentId": "orders"
+          },
+          {
+            "id": "ledger",
+            "name": "Order ledger + outbox",
+            "kind": "database",
+            "parentId": "orders"
+          },
+          {
+            "id": "relay",
+            "name": "Outbox relay",
+            "kind": "service",
+            "parentId": "orders"
+          },
+          {
+            "id": "payment",
+            "name": "Payment provider",
+            "kind": "service"
+          },
+          {
+            "id": "broker",
+            "name": "Event broker",
+            "kind": "queue"
+          },
+          {
+            "id": "fulfillment",
+            "name": "Fulfillment",
+            "kind": "container"
+          },
+          {
+            "id": "worker",
+            "name": "Fulfillment worker",
+            "kind": "service",
+            "parentId": "fulfillment"
+          },
+          {
+            "id": "shipping-db",
+            "name": "Shipment ledger",
+            "kind": "database",
+            "parentId": "fulfillment"
+          }
+        ],
+        "edges": [
+          {
+            "id": "shop-order",
+            "source": "shop",
+            "target": "api",
+            "direction": "one-way"
+          },
+          {
+            "id": "order-ledger",
+            "source": "api",
+            "target": "ledger",
+            "direction": "one-way"
+          },
+          {
+            "id": "order-payment",
+            "source": "api",
+            "target": "payment",
+            "direction": "one-way"
+          },
+          {
+            "id": "relay-ledger",
+            "source": "relay",
+            "target": "ledger",
+            "direction": "one-way"
+          },
+          {
+            "id": "relay-broker",
+            "source": "relay",
+            "target": "broker",
+            "direction": "one-way"
+          },
+          {
+            "id": "broker-worker",
+            "source": "broker",
+            "target": "worker",
+            "direction": "one-way"
+          },
+          {
+            "id": "worker-ledger",
+            "source": "worker",
+            "target": "shipping-db",
+            "direction": "one-way"
+          },
+          {
+            "id": "worker-order",
+            "source": "worker",
+            "target": "api",
+            "direction": "one-way"
+          }
+        ]
+      },
+      "assumptions": "Two internal submodules; one worker → shipment ledger interaction gives K̄=0.5. Broker and Orders are external crossings.",
+      "recommendations": "Keep deduplication and shipment intent together. Removing the synchronous Orders lookup needs a versioned event contract and an explicit cancellation policy; preserve data ownership. Carrier integration is documented but not separately modeled, so extend the topology before a detailed carrier analysis.",
+      "stressors": [
+        {
+          "id": "s-replay",
+          "name": "Crash and replay",
+          "scenario": "Commit local shipment intent, then crash before broker acknowledgment.",
+          "set": "training",
+          "impacts": [
+            {
+              "componentId": "worker",
+              "state": "failed",
+              "evidence": "Hypothesis: durable ledger survives worker restart; verify transaction boundaries."
+            },
+            {
+              "componentId": "shipping-db",
+              "state": "unaffected",
+              "evidence": "Hypothesis: durable ledger survives worker restart; verify transaction boundaries."
+            }
+          ]
+        }
+      ],
+      "residues": [
+        {
+          "id": "r-local-replay",
+          "name": "Replayable fulfillment",
+          "stressorIds": [
+            "s-replay"
+          ],
+          "componentIds": [
+            "worker",
+            "shipping-db"
+          ],
+          "survives": "Durable event identity and shipment intent permit replay without another local shipment record.",
+          "adaptation": "Commit deduplication and shipment intent atomically. Use idempotent carrier requests plus reconciliation. Consider an event projection to remove the Orders callback.",
+          "remaining": "Local deduplication alone cannot guarantee exactly-once external carrier effects. Schema evolution, backlog and stale cancellation information need tests.",
+          "evidence": "Proposed test: crash before/after database commit and carrier response; replay each event and reconcile the carrier ledger.",
+          "status": "hypothesis"
+        }
+      ]
+    }
+  ],
+  "library": []
+}
