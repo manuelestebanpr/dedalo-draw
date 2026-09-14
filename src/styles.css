@@ -1719,3 +1719,25 @@ button {
   overflow-wrap: anywhere;
   text-align: center;
 }
+
+.details-readonly {
+  margin: 0;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.details-readonly dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.details-readonly dd {
+  margin: 0;
+  color: var(--navy);
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}

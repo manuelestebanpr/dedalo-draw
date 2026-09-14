@@ -53,7 +53,8 @@ for (const mode of ['desktop', 'view'] as const) {
     }
     await expect(page.locator('.react-flow__edge[data-id="security-accounts"]')).toHaveCount(0);
     if (mode === 'view') {
-      await expect(page.getByLabel('Name', { exact: true })).toBeDisabled();
+      await expect(page.locator('.details-readonly')).toContainText('Controllers');
+      await expect(page.locator('.inspector input')).toHaveCount(0);
       await expect(page.locator('.react-flow__resize-control')).toHaveCount(0);
     }
     await page.getByRole('button', { name: 'Close details' }).click();

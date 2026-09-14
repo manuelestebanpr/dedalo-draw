@@ -1,4 +1,4 @@
-import { routeConnection } from './routing';
+import { routeConnections } from './routing';
 import { canContain } from './containment';
 import { absolutePositions, palette, entityColor, type Project } from './model';
 import { shapePath } from './shapes';
@@ -49,7 +49,7 @@ export function projectSvg(project: Project): { svg: string; width: number; heig
       width: item.width,
       height: item.height,
     })),
-    map = new Map(routingNodes.map((node) => [node.item.id, node]));
+    routes = routeConnections(routingNodes, project.connections);
   let minX = 0,
     minY = 0,
     maxX = 600,
@@ -89,9 +89,7 @@ export function projectSvg(project: Project): { svg: string; width: number; heig
   const cards = shapes.slice(project.items.filter(canContain).length).join('');
   const edges = project.connections
     .map((edge) => {
-      const a = map.get(edge.source)!,
-        b = map.get(edge.target)!;
-      const route = routeConnection(a, b, edge, routingNodes);
+      const route = routes.get(edge.id)!;
       const d = route.path;
       const labelLines = connectionText(
         (edge.direction === 'bidirectional' ? '↔ ' : '→ ') + edge.name,

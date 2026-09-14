@@ -1,4 +1,4 @@
-import { memo, useMemo, type CSSProperties } from 'react';
+import { memo, type CSSProperties } from 'react';
 import {
   Handle,
   Position,
@@ -11,12 +11,13 @@ import {
   type NodeProps,
   type Edge,
   type EdgeProps,
+  type ReactFlowState,
 } from '@xyflow/react';
 import { entityColor, displayGroup, type Item, type Connection } from '../core/model';
 import { brandPaths } from '../core/brands';
 import { iconPaths } from '../core/library';
 import { shapePath } from '../core/shapes';
-import { routeConnection } from '../core/routing';
+import { routeConnections } from '../core/routing';
 import { canContain, canBecomeParent } from '../core/containment';
 export type ItemNode = Node<
   {
@@ -272,14 +273,19 @@ export const ComponentNode = memo(function ComponentNode({ data, selected }: Nod
     </div>
   );
 });
-export const ConnectionEdge = memo(function ConnectionEdge(props: EdgeProps<LinkEdge>) {
-  const level = useStore(lod);
-  const nodeLookup = useStore((state) => state.nodeLookup);
-  const flowNodes = useStore((state) => state.nodes);
-  const data = props.data;
-  const route = useMemo(() => {
-    if (!data) return undefined;
-    const nodes = [...nodeLookup.values()]
+// Every edge shares one routing pass for a given canvas geometry. React Flow replaces
+// its nodes array during dragging, even when nodeLookup itself is mutated in place.
+let cachedNodes: ReactFlowState['nodes'] | undefined;
+let cachedEdges: ReactFlowState['edges'] | undefined;
+let cachedLookup: ReactFlowState['nodeLookup'] | undefined;
+let cachedRoutes: ReturnType<typeof routeConnections>;
+function canvasRoutes(state: ReactFlowState) {
+  if (
+    state.nodes !== cachedNodes ||
+    state.edges !== cachedEdges ||
+    state.nodeLookup !== cachedLookup
+  ) {
+    const nodes = [...state.nodeLookup.values()]
       .filter((n) => !n.hidden && n.data.item)
       .map((n) => ({
         item: n.data.item as Item,
@@ -287,20 +293,25 @@ export const ConnectionEdge = memo(function ConnectionEdge(props: EdgeProps<Link
         width: n.measured.width || n.width || (n.data.item as Item).width,
         height: n.measured.height || n.height || (n.data.item as Item).height,
       }));
-    const a = nodes.find((n) => n.item.id === props.source),
-      b = nodes.find((n) => n.item.id === props.target);
-    return a && b ? routeConnection(a, b, data.connection, nodes) : undefined;
-  }, [
-    nodeLookup,
-    flowNodes,
-    data,
-    props.source,
-    props.target,
-    props.sourceX,
-    props.sourceY,
-    props.targetX,
-    props.targetY,
-  ]);
+    const connections = state.edges
+      .filter((e) => !e.hidden && e.data?.connection)
+      .map((e) => ({
+        ...(e.data!.connection as Connection),
+        source: e.source,
+        target: e.target,
+      }));
+    cachedRoutes = routeConnections(nodes, connections);
+    cachedNodes = state.nodes;
+    cachedEdges = state.edges;
+    cachedLookup = state.nodeLookup;
+  }
+  return cachedRoutes;
+}
+export const ConnectionEdge = memo(function ConnectionEdge(props: EdgeProps<LinkEdge>) {
+  const level = useStore(lod);
+  const routes = useStore(canvasRoutes);
+  const data = props.data;
+  const route = routes.get(props.id);
   if (!data || !route) return null;
   const edge = data.connection;
   return (

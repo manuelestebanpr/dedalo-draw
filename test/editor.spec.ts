@@ -731,20 +731,53 @@ test('read mode exposes immutable details and calculated parent above Name', asy
   const page = await context.newPage();
   await page.goto('/');
   await expect(page.getByText('MCP ready', { exact: true })).toHaveCount(1);
+  const project = await command('get_project');
+  const orders = project.items.find((item: any) => item.id === 'orders');
+  const purpose = `${'Full component responsibility. '.repeat(80)}\nFinal line of the purpose.`;
+  const owner = 'ResponsibleTeam'.repeat(50);
+  await command('apply_transaction', {
+    transaction: {
+      baseRevision: project.revision,
+      upsertItems: [
+        {
+          ...orders,
+          groups: ['commerce', 'platform'],
+          details: { ...orders.details, description: purpose, owner },
+        },
+      ],
+    },
+  });
+  const beforeViewing = await command('get_project');
   await command('focus', { ids: ['orders'] });
   await page.locator('[data-id="orders"] .card-heading').tap();
   const inspector = page.getByRole('complementary', { name: 'Technical details' });
   await expect(inspector).toBeVisible();
-  await expect(inspector.getByLabel('Name', { exact: true })).toBeDisabled();
-  await expect(inspector.getByRole('textbox', { name: 'Purpose', exact: true })).toBeDisabled();
-  await expect(inspector.getByRole('button', { name: 'Apply details' })).toHaveCount(0);
-  await expect(inspector.getByLabel('Parent', { exact: true })).toHaveValue('Commerce platform');
-  await expect(inspector.getByLabel('Parent', { exact: true })).toHaveAttribute('readonly', '');
+  await expect(inspector.locator('input, textarea, select, form')).toHaveCount(0);
+  await expect(inspector.getByRole('button')).toHaveCount(1);
+  await expect(inspector.locator('dt').first()).toHaveText('Parent');
+  await expect(inspector.locator('dd').first()).toHaveText('Commerce platform');
+  await expect(inspector.locator('.details-readonly')).toContainText('Order service');
+  const purposeValue = inspector
+    .locator('dl > div')
+    .filter({ has: page.locator('dt', { hasText: /^Purpose$/ }) })
+    .locator('dd');
+  const ownerValue = inspector
+    .locator('dl > div')
+    .filter({ has: page.locator('dt', { hasText: /^Owner$/ }) })
+    .locator('dd');
+  await expect(purposeValue).toHaveText(purpose);
+  await expect(purposeValue).toHaveCSS('white-space', 'pre-wrap');
+  await expect(ownerValue).toHaveText(owner);
+  await ownerValue.scrollIntoViewIfNeeded();
+  await expect(ownerValue).toBeVisible();
+  expect(await ownerValue.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
+    true,
+  );
   expect(
-    await inspector
-      .locator('input')
-      .evaluateAll((inputs) => (inputs[0] as HTMLInputElement).labels?.[0].textContent?.trim()),
-  ).toBe('Parent');
+    await purposeValue.evaluate((element) => element.scrollHeight <= element.clientHeight),
+  ).toBe(true);
+  await expect(inspector.locator('.details-readonly')).toContainText('Commerce, Platform');
+  expect(await command('get_project')).toEqual(beforeViewing);
   await page.getByRole('button', { name: 'Edit', exact: true }).tap();
   await expect(inspector.getByLabel('Name', { exact: true })).toBeEnabled();
   await expect(inspector.getByLabel('Parent', { exact: true })).toHaveAttribute('readonly', '');
